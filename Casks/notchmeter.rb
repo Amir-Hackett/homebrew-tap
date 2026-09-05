@@ -6,12 +6,12 @@
 # Casks/notchmeter.rb in a repository named homebrew-tap under the same account, and users run
 #   brew tap Amir-Hackett/tap && brew install --cask notchmeter
 # scripts/release.sh prints the sha256 of each DMG; bump `version` and `sha256` together.
-# A --dry-run DMG is ad-hoc signed and Gatekeeper refuses it on other Macs; a tester installs one with
-# `brew install --cask --no-quarantine notchmeter` (docs/release.md, "Testing an unsigned build"). The published
-# release is notarised and needs neither.
+# Before the Developer ID exists the DMG is ad-hoc signed and Gatekeeper refuses it on other Macs; a tester can
+# install it with `brew install --cask --no-quarantine notchmeter` (docs/release.md, "Testing a build before the
+# Developer ID exists"). The notarised release needs neither.
 cask "notchmeter" do
-  version "0.2.0"
-  sha256 "237bf77b860ad0a84e85da667f8be79c080cbad429d9e852442cdca31ea71765"
+  version "0.1.0"
+  sha256 "5e447e997783edf6755a95187d406861b1b099ca0f070a521ece65a59953ac45"
 
   url "https://github.com/Amir-Hackett/notchmeter/releases/download/v#{version}/Notchmeter.dmg"
   name "Notchmeter"
