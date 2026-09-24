@@ -13,8 +13,8 @@
 # `brew install --cask --no-quarantine notchmeter` (docs/release.md, "Testing an unsigned build"). The published
 # release is notarised and needs neither.
 cask "notchmeter" do
-  version "0.7.8"
-  sha256 "86e25d265d32164c20b00a71924bee8737d2536966634de3a408a16d5026ac84"
+  version "0.7.9"
+  sha256 "67d72a1387cac632198c36918475bfeb05f04999106e470abf0cf9a9b90d2da2"
 
   url "https://github.com/Amir-Hackett/notchmeter/releases/download/v#{version}/Notchmeter.dmg"
   name "Notchmeter"
@@ -27,8 +27,8 @@ cask "notchmeter" do
   end
 
   auto_updates true
-  # A bare symbol is the minimum version; the ">= :sonoma" string form is deprecated and warns on every install.
-  depends_on macos: :sonoma
+  # A bare symbol is the minimum version; the ">= :sequoia" string form is deprecated and warns on every install.
+  depends_on macos: :sequoia
 
   app "Notchmeter.app"
   # The command-line tool is the same executable; Settings › General also links it into ~/.local/bin.
