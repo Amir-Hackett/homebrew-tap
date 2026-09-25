@@ -1,0 +1,63 @@
+# Keeps Casks/notchmeter.rb pointed at the latest promoted Notchmeter release.
+#
+# The release procedure in Amir-Hackett/notchmeter promotes a release to latest only after the built app has been
+# installed and launched, so "latest" is the only version this tap should ever name. Until this workflow existed the
+# bump was a hand-run copy of packaging/homebrew/notchmeter.rb and a push here, which a release can forget: 0.7.9's
+# did the copy but never verified brew on the release Mac. Now the cask follows the release on its own: on a
+# schedule, and on demand from the release procedure (gh workflow run bump-notchmeter.yml -R Amir-Hackett/homebrew-tap).
+# A prerelease is ignored by construction, because releases/latest never resolves to one. The default token can
+# push to this repository, so no secret is involved.
+name: Bump notchmeter
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bump-notchmeter
+  cancel-in-progress: false
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read the latest promoted release
+        id: latest
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag=$(gh release view --repo Amir-Hackett/notchmeter --json tagName,isPrerelease -q 'select(.isPrerelease | not) | .tagName' 2>/dev/null || true)
+          # `gh release view` without a tag is the latest non-prerelease, non-draft release.
+          if [ -z "$tag" ]; then echo "no promoted release"; exit 1; fi
+          version="${tag#v}"
+          current=$(grep -E '^\s*version "' Casks/notchmeter.rb | sed -E 's/.*"([^"]+)".*/\1/')
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "current=$current" >> "$GITHUB_OUTPUT"
+          echo "latest $version, cask at $current"
+
+      - name: Point the cask at it
+        if: steps.latest.outputs.version != steps.latest.outputs.current
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.latest.outputs.tag }}
+          VERSION: ${{ steps.latest.outputs.version }}
+        run: |
+          set -euo pipefail
+          gh release download "$TAG" --repo Amir-Hackett/notchmeter --pattern Notchmeter.dmg --dir dmg --clobber
+          sha=$(sha256sum dmg/Notchmeter.dmg | cut -d' ' -f1)
+          # The cask names the version and the checksum on two adjacent lines; nothing else changes.
+          sed -i -E "s/^(\s*version )\"[^\"]+\"/\1\"$VERSION\"/; s/^(\s*sha256 )\"[0-9a-f]+\"/\1\"$sha\"/" Casks/notchmeter.rb
+          grep -E '^\s*(version|sha256) "' Casks/notchmeter.rb
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Casks/notchmeter.rb
+          git commit -m "notchmeter $VERSION" -m "From the promoted release $TAG, by the bump workflow."
+          git push
