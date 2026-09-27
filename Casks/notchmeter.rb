@@ -18,7 +18,7 @@ cask "notchmeter" do
 
   url "https://github.com/Amir-Hackett/notchmeter/releases/download/v#{version}/Notchmeter.dmg"
   name "Notchmeter"
-  desc "Usage rings for Claude Code, Codex, Cursor, Gemini CLI and Copilot beside the MacBook notch or on a screen edge"
+  desc "Usage rings for Claude Code, Codex, Cursor and more, beside the MacBook notch or on a screen edge"
   homepage "https://github.com/Amir-Hackett/notchmeter"
 
   livecheck do
